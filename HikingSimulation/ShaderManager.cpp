@@ -1,4 +1,10 @@
 #include "ShaderManager.h"
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <stdexcept>
+
+using namespace std;
 
 // Constructor
 
@@ -27,6 +33,30 @@ void ShaderManager::compileShader(const char* shaderSource, GLenum shaderType) {
 	// Make this bool and handle if error
 }
 
+
 // GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 // glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
 // glCompileShader(vertexShader);
+
+
+
+// Load shaders from file
+// Ability to load shader code at runtime instead of only when compilating
+string ShaderManager::loadShaderSourceFile(const string& sFileName) {
+	// Load the shader program as a single string
+	string output = "";
+	string line = "";
+
+	ifstream shaderFile(sFileName);
+
+	if (!shaderFile.is_open()) {
+		throw runtime_error("Could not load shader file: " + sFileName);
+	}
+
+	stringstream buffer;
+	buffer << shaderFile.rdbuf();
+
+	return buffer.str();
+}
+
+

@@ -6,7 +6,7 @@
 class VertexShaderManager : public ShaderManager {
 
 public:
-	void initialize(const char* vertexSource);
+	void initialize(const char* vertexSourceFile);
 };
 
 

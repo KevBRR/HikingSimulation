@@ -67,8 +67,8 @@ int main()
 
     // Shaders
     // Add error handling, need to know if the shader fails to initialize
-    vertexShaderManager.initialize(vertexShaderSource);
-    fragmentShaderManager.initialize(fragmentShaderSource);
+    vertexShaderManager.initialize("vertexShader.glsl");
+    fragmentShaderManager.initialize("fragmentShader.glsl");
 
     // Place it in it's own class,
     // read file in class
