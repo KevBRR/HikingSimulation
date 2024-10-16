@@ -145,11 +145,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FragmentShaderManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="VertexShaderManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FragmentShaderManager.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="VertexShaderManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

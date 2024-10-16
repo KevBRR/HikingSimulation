@@ -8,24 +8,21 @@
 // Handles the construction, compilation and destruction for the shaders, i.e Vertex Shader and Fragment Shader
 // Also returns the associated shaderId when constructed
 
-class ShaderManager() {
+class ShaderManager {
 
 	GLuint shaderId;
 
 public:
 	// Base ShaderManager constructor
 	ShaderManager();
-	// Base ShaderManager destructor - runs at runtime
+	// Base ShaderManager destructor - To run at runtime
 	virtual ~ShaderManager();
 
 	GLuint getShaderId() const;
 
 protected:
-	bool compileShader( const char* shaderSource,  )
+	void compileShader(const char* shaderSource, GLenum shaderType);
 
-	
-
-
-}
+};
 
 #endif // !SHADER_MANAGER_H

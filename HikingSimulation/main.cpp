@@ -1,6 +1,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "VertexShaderManager.h"
+#include "FragmentShaderManager.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -14,6 +16,10 @@ void processInput(GLFWwindow* window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+// Shader Managers
+VertexShaderManager vertexShaderManager;
+FragmentShaderManager fragmentShaderManager;
 
 // Vertex shader source code
 const char* vertexShaderSource = R"(
@@ -59,20 +65,25 @@ int main()
         return -1;
     }
 
+    // Shaders
+    // Add error handling, need to know if the shader fails to initialize
+    vertexShaderManager.initialize(vertexShaderSource);
+    fragmentShaderManager.initialize(fragmentShaderSource);
+
     // Place it in it's own class,
     // read file in class
     // Compile and link shaders
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
+    //GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    //glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    //glCompileShader(vertexShader);
 
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
+    //GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    //glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    //glCompileShader(fragmentShader);
 
     GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
+    glAttachShader(shaderProgram, vertexShaderManager.getShaderId());
+    glAttachShader(shaderProgram, fragmentShaderManager.getShaderId());
     glLinkProgram(shaderProgram);
 
     float vertices[] = {
@@ -110,8 +121,8 @@ int main()
     }
 	
     glDeleteProgram(shaderProgram);
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    //glDeleteShader(vertexShader);
+    //glDeleteShader(fragmentShader);
 	glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
