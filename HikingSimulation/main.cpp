@@ -13,6 +13,12 @@ void processInput(GLFWwindow* window);
 // Make shader manager for vertex shader and fragment shader
 // We need terrain manager as well
 
+// VAO - vertex array object
+// VAO Acts as a 'wrapper around' all of the vertex buffer objects
+// Important that we glBindVertexArray, this means select the VAO we want to use
+
+// VBO - vertex buffer object
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -87,9 +93,9 @@ int main()
     glLinkProgram(shaderProgram);
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left  
-         0.5f, -0.5f, 0.0f, // right 
-         0.0f,  0.5f, 0.0f  // top   
+        -0.5f, -0.5f, 0.0f, // left vertex position
+         0.5f, -0.5f, 0.0f, // right vertex position
+         0.0f,  0.5f, 0.0f  // top vertex position
     };
 
     unsigned int VBO, VAO;
@@ -97,6 +103,7 @@ int main()
     glGenBuffers(1, &VBO);
     
     glBindVertexArray(VAO);
+    // Bind means that we are 'selecting the active buffer object' that we want to work with
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
