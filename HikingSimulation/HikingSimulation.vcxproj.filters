@@ -19,6 +19,12 @@
     <Filter Include="Header Files\Managers">
       <UniqueIdentifier>{957555d9-246b-4420-8119-ce2e6f079660}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Terrain">
+      <UniqueIdentifier>{1d17cc56-ed2e-4d08-bf2e-1383879d3c3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Terrain">
+      <UniqueIdentifier>{52c18c95-785e-481f-ba2f-6f3cc1faf2a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -33,6 +39,9 @@
     <ClCompile Include="FragmentShaderManager.cpp">
       <Filter>Source Files\Managers</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files\Terrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderManager.h">
@@ -42,6 +51,9 @@
       <Filter>Header Files\Managers</Filter>
     </ClInclude>
     <ClInclude Include="FragmentShaderManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
       <Filter>Header Files\Managers</Filter>
     </ClInclude>
   </ItemGroup>
