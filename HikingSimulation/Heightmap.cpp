@@ -19,6 +19,7 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
 
     string pathMerge = string("resources/heightmaps/") + heightMapPath;
 
+    //stbi_set_flip_vertically_on_load(true);
     heightMapData = stbi_load(pathMerge.c_str(),
         &width, &height, &nChannels,
         0);
@@ -30,7 +31,9 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
 
     // vertex generation
     vector<float> vertices;
-    float yScale = 64.0f / 256.0f, yShift = 16.0f;  // apply a scale+shift to the height data
+
+    // 192.0f
+    float yScale = 256.0f / 256.0f, yShift = 16.0f;  // 16.0f apply a scale+shift to the height data
     for (unsigned int i = 0; i < height; i++)
     {
         for (unsigned int j = 0; j < width; j++)
@@ -63,6 +66,8 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
         }
     }
 
+    std::cout << "Loaded " << indices.size() << " indices" << std::endl;
+
     // Needed for rendering
     // Number of strips to be rendered 
     const unsigned int NUM_STRIPS = height - 1;
@@ -74,6 +79,7 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
     output.vertices = vertices;
     output.NUM_STRIPS = NUM_STRIPS;
     output.NUM_VERTS_PER_STRIP = NUM_VERTS_PER_STRIP;
+    output.indices = indices;
 
     return output;
 

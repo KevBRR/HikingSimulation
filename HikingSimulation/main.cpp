@@ -18,8 +18,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // Window constraints 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1920; // 800
+const unsigned int SCR_HEIGHT = 1080; // 600
 
 // Camera 
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -78,8 +78,8 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Initializes GLEW, for the ability to access the functions with it
     GLenum err = glewInit();
@@ -98,9 +98,13 @@ int main()
 
     if (heightData.vertices.empty()) {
         cout << "Failed to load the height map data" << endl;
+        return -1;
     }
-
-
+    else {
+        std::cout << "Successfully loaded heightmap data!" << std::endl;
+        std::cout << "Number of vertices: " << heightData.vertices.size() / 3 << std::endl;
+        std::cout << "Number of indices: " << heightData.indices.size() << std::endl;
+    }
 
     // Creates the OpenGL shader program
     GLuint shaderProgram = glCreateProgram();
@@ -110,36 +114,35 @@ int main()
     // Link the shaders into the complete shader program to run on the GPU
     glLinkProgram(shaderProgram);
 
-    // Vertex data
-    // An array of three vertices in 3D space, ultimately forming a triangle
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left vertex position
-         0.5f, -0.5f, 0.0f, // right vertex position
-         0.0f,  0.5f, 0.0f  // top vertex position
-    };
-
-    glm::vec3 verticesPositions[] =
-    {
-        glm::vec3(0.0f, 0.0f, 0.0f),
-    };
-
-    // Generate a Vertex Array Object (VAO) and a Vertex Buffer Object (VBO)
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    
+    // Generate a Vertex Array Object (VAO), a Vertex Buffer Object (VBO) and a Element Array Buffer Object
+    GLuint terrainVAO, terrainVBO, terrainEBO;
+    glGenVertexArrays(1, &terrainVAO);
     // Bind means that we are 'selecting the active buffer object' that we want to work with
-    glBindVertexArray(VAO);
+    glBindVertexArray(terrainVAO);
+
+    glGenBuffers(1, &terrainVBO);
     // Bind or 'select' the VBO as the active buffer in the array buffer target
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);
     // Copy the vertex data into the buffer memory on the GPU
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 
+        heightData.vertices.size() * sizeof(float), // The size of the vertices buffer -> if too much change to int
+        &heightData.vertices[0], 
+        GL_STATIC_DRAW
+    );
 
     // The Vertex attribute pointer tells us how to intepret the vertex data, as this will vary
     // Here each vertex has 3 GL_FLOAT values and that there is not additional data with them
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     // Enables and sets the vertex array attribute array at index 0
     glEnableVertexAttribArray(0);
+
+    glGenBuffers(1, &terrainEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+        heightData.indices.size() * sizeof(unsigned),
+        &heightData.indices[0],
+        GL_STATIC_DRAW
+    );
 
     // Simulation loop, this is where the drawing happens
     while (!glfwWindowShouldClose(window))
@@ -151,33 +154,32 @@ int main()
         // Handle keyboard input
         processInput(window);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Acts as background color
+        glClearColor(0.1f, 0.01f, 0.1f, 1.0f); // Acts as background color
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen and uses the selected color above
       
         glUseProgram(shaderProgram);
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
-        //glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
         // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
         // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1500.0f);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
         // Tells the program which shader program is being used
         // The one we made previously
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO); // Binds the VAO, making it the current active vertex array
+        //glUseProgram(shaderProgram);
+        glBindVertexArray(terrainVAO); // Binds the VAO, making it the current active vertex array
         
-        for (GLuint i = 0; i < 1; i++) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, verticesPositions[i]);
-            GLfloat angle = 20.0f * i;
-            model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
-
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+        for (unsigned int strip = 0; strip < heightData.NUM_STRIPS; ++strip) {
+            glDrawElements(GL_TRIANGLE_STRIP,
+                heightData.NUM_VERTS_PER_STRIP+2,
+                GL_UNSIGNED_INT,
+                (void*)(sizeof(unsigned)
+                    * (heightData.NUM_VERTS_PER_STRIP+2)
+                    * strip));
         }
 
 
@@ -189,8 +191,9 @@ int main()
     glDeleteProgram(shaderProgram);
     //glDeleteShader(vertexShader);
     //glDeleteShader(fragmentShader);
-	glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &terrainVAO);
+    glDeleteBuffers(1, &terrainVBO);
+    glDeleteBuffers(1, &terrainEBO);
 
     glfwTerminate();
 
