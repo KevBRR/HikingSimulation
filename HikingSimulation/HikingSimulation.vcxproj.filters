@@ -25,6 +25,9 @@
     <Filter Include="Header Files\Terrain">
       <UniqueIdentifier>{52c18c95-785e-481f-ba2f-6f3cc1faf2a4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Environment">
+      <UniqueIdentifier>{0990877c-a9ff-4cab-ae7b-8cbe5e2727b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -55,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="Terrain.h">
       <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files\Environment</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

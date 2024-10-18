@@ -3,11 +3,32 @@
 #include <iostream>
 #include "VertexShaderManager.h"
 #include "FragmentShaderManager.h"
+#include "camera.h"
 
+
+
+// Callbacks
 // For when the window is resized to adjust the viewport
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // Handle keyboard input for the window i.e press escape to close the window
 void processInput(GLFWwindow* window);
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+// Window constraints 
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+// Camera 
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// Time
+float deltaTime = 0.0f; // delta time between current and last frame
+float lastFrame = 0.0f;
 
 // lookat, perspective
 // terrain class, shader manager
@@ -20,10 +41,6 @@ void processInput(GLFWwindow* window);
 // Important that we glBindVertexArray, this means select the VAO we want to use
 
 // VBO - vertex buffer object
-
-// Window constraints 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
 
 // Shader Managers
 VertexShaderManager vertexShaderManager;
@@ -50,6 +67,16 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // Tell GLFW to capure the mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glEnable(GL_DEPTH_TEST);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Initializes GLEW, for the ability to access the functions with it
     GLenum err = glewInit();
@@ -102,17 +129,34 @@ int main()
     // Simulation loop, this is where the drawing happens
     while (!glfwWindowShouldClose(window))
     {
+        float currentFrame = static_cast<float>(glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         // Handle keyboard input
         processInput(window);
 
-        glClearColor(0.8f, 0.0f, 0.3f, 1.0f); // Acts as background color
-        glClear(GL_COLOR_BUFFER_BIT); // Clear the screen and uses the selected color above
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Acts as background color
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen and uses the selected color above
 
         // Tells the program which shader program is being used
         // The one we made previously
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO); // Binds the VAO, making it the current active vertex array
         glDrawArrays(GL_TRIANGLES, 0, 3); // Draws the vertices as a triangle
+
+        
+        glUseProgram(shaderProgram);
+        // pass projection matrix to shader (note that in this case it could change every frame)
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+        // camera/view transformation
+        glm::mat4 view = camera.GetViewMatrix();
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+        
+        // world transformation
+        glm::mat4 model = glm::mat4(1.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
         glfwSwapBuffers(window); // Swaps the color buffers to display
         glfwPollEvents(); // Finally process events, like keyboard inputs
@@ -133,11 +177,49 @@ int main()
 // the key functions, ex. if you want to have your camera to move
 void processInput(GLFWwindow* window)
 {
+    float cameraSpeed = 2.5f * deltaTime;
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }

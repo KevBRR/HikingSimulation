@@ -1,6 +1,7 @@
 #ifndef SHADER_MANAGER_H
 #define SHADER_MANAGER_H
 
+#define GLFW_INCLUDE_NONE
 #include <GL/glew.h>
 #include <iostream>
 
