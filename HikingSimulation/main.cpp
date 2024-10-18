@@ -48,11 +48,6 @@ VertexShaderManager vertexShaderManager;
 FragmentShaderManager fragmentShaderManager;
 Heightmap heightMap;
 
-// Heightmaps paths
-// "resources/heightmaps/høydedata_svarthvitt.png"
-// "resources/heightmaps/høydedata.png"
-
-
 int main()
 {
     if (!glfwInit()) {
@@ -94,6 +89,10 @@ int main()
     // Add error handling, need to know if the shader fails to initialize
     vertexShaderManager.initialize("vertexShader.glsl");
     fragmentShaderManager.initialize("fragmentShader.glsl");
+
+    // Heightmaps paths
+    // "resources/heightmaps/høydedata_svarthvitt.png"
+    // "resources/heightmaps/høydedata.png"
     heightRet heightData = heightMap.initialize("høydedata_svarthvitt.png");
 
     if (heightData.vertices.empty()) {
@@ -165,7 +164,7 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
         // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1500.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 5000.0f);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
         // Tells the program which shader program is being used
@@ -175,10 +174,10 @@ int main()
         
         for (unsigned int strip = 0; strip < heightData.NUM_STRIPS; ++strip) {
             glDrawElements(GL_TRIANGLE_STRIP,
-                heightData.NUM_VERTS_PER_STRIP+2,
+                heightData.NUM_VERTS_PER_STRIP,
                 GL_UNSIGNED_INT,
                 (void*)(sizeof(unsigned)
-                    * (heightData.NUM_VERTS_PER_STRIP+2)
+                    * (heightData.NUM_VERTS_PER_STRIP)
                     * strip));
         }
 

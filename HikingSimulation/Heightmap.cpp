@@ -33,7 +33,7 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
     vector<float> vertices;
 
     // 192.0f
-    float yScale = 256.0f / 256.0f, yShift = 16.0f;  // 16.0f apply a scale+shift to the height data
+    float yScale = 256.0f / 256.0f, yShift = -25.0f;  // 16.0f apply a scale+shift to the height data
     for (unsigned int i = 0; i < height; i++)
     {
         for (unsigned int j = 0; j < width; j++)
