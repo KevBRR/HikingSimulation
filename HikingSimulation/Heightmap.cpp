@@ -1,6 +1,5 @@
 #include <GL/glew.h>
 #include <iostream>
-
 #include "Heightmap.h"
 #include "stb_image.h"
 #include <vector>
@@ -10,29 +9,24 @@ using namespace std;
 int width;
 int height;
 int nChannels;
-unsigned char* data;
+unsigned char* heightMapData;
 
 // Constructor
 
-struct heightRet
-{
-    std::vector<float> vertices;
-    const unsigned int NUM_STRIPS;
-    const unsigned int NUM_VERTS_PER_STRIP;
-};
+
 
 heightRet Heightmap::initialize(const char* heightMapPath) {
 
-    
+    string pathMerge = string("resources/heightmaps/") + heightMapPath;
 
-    string pathMerge;
-
-    char vs[128] = "resources/heightmaps/";
-    strcat_s(vs, heightMapPath);
-
-    data = stbi_load(pathMerge.c_str(),
+    heightMapData = stbi_load(pathMerge.c_str(),
         &width, &height, &nChannels,
         0);
+
+    if (!heightMapData) {
+        cout << "Failed to load heightmap: " << heightMapPath << endl;
+        return heightRet{};
+    }
 
     // vertex generation
     vector<float> vertices;
@@ -42,7 +36,7 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
         for (unsigned int j = 0; j < width; j++)
         {
             // retrieve texel for (i,j) tex coord
-            unsigned char* texel = data + (j + width * i) * nChannels;
+            unsigned char* texel = heightMapData + (j + width * i) * nChannels;
             // raw height at coordinate
             unsigned char y = texel[0];
 
@@ -53,7 +47,7 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
         }
     }
 
-    stbi_image_free(data);
+    stbi_image_free(heightMapData);
 
     // index generation
     // Generate the indices for each triangle strip
@@ -74,6 +68,15 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
     const unsigned int NUM_STRIPS = height - 1;
     // Number of vertices per strip 
     const unsigned int NUM_VERTS_PER_STRIP = width * 2;
+
+    heightRet output;
+
+    output.vertices = vertices;
+    output.NUM_STRIPS = NUM_STRIPS;
+    output.NUM_VERTS_PER_STRIP = NUM_VERTS_PER_STRIP;
+
+    return output;
+
 }
 
 

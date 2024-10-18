@@ -31,13 +31,6 @@ bool firstMouse = true;
 float deltaTime = 0.0f; // delta time between current and last frame
 float lastFrame = 0.0f;
 
-// HeightMap
-std::vector<float> vertices;
-const unsigned int NUM_STRIPS;
-const unsigned int NUM_VERTS_PER_STRIP;
-
-
-
 // lookat, perspective
 // terrain class, shader manager
 
@@ -85,8 +78,8 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Initializes GLEW, for the ability to access the functions with it
     GLenum err = glewInit();
@@ -101,7 +94,11 @@ int main()
     // Add error handling, need to know if the shader fails to initialize
     vertexShaderManager.initialize("vertexShader.glsl");
     fragmentShaderManager.initialize("fragmentShader.glsl");
-    Heightmap heightMap("høydedata_svarthvitt.png");
+    heightRet heightData = heightMap.initialize("høydedata_svarthvitt.png");
+
+    if (heightData.vertices.empty()) {
+        cout << "Failed to load the height map data" << endl;
+    }
 
 
 
