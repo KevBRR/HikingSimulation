@@ -45,6 +45,9 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>Source Files\Terrain</Filter>
     </ClCompile>
+    <ClCompile Include="Heightmap.cpp">
+      <Filter>Source Files\Terrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderManager.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files\Environment</Filter>
     </ClInclude>
     <ClInclude Include="Terrain.h">
+      <Filter>Header Files\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="Heightmap.h">
       <Filter>Header Files\Terrain</Filter>
     </ClInclude>
   </ItemGroup>

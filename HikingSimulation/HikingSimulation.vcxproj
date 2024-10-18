@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FragmentShaderManager.cpp" />
+    <ClCompile Include="Heightmap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Terrain.cpp" />
@@ -154,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="FragmentShaderManager.h" />
+    <ClInclude Include="Heightmap.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="VertexShaderManager.h" />

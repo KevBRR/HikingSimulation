@@ -1,11 +1,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "stb_image.h"
 #include <iostream>
 #include "VertexShaderManager.h"
 #include "FragmentShaderManager.h"
 #include "camera.h"
-
-
+#include "Heightmap.h"
+#include <vector>
 
 // Callbacks
 // For when the window is resized to adjust the viewport
@@ -30,6 +31,13 @@ bool firstMouse = true;
 float deltaTime = 0.0f; // delta time between current and last frame
 float lastFrame = 0.0f;
 
+// HeightMap
+std::vector<float> vertices;
+const unsigned int NUM_STRIPS;
+const unsigned int NUM_VERTS_PER_STRIP;
+
+
+
 // lookat, perspective
 // terrain class, shader manager
 
@@ -45,10 +53,12 @@ float lastFrame = 0.0f;
 // Shader Managers
 VertexShaderManager vertexShaderManager;
 FragmentShaderManager fragmentShaderManager;
+Heightmap heightMap;
 
 // Heightmaps paths
 // "resources/heightmaps/høydedata_svarthvitt.png"
 // "resources/heightmaps/høydedata.png"
+
 
 int main()
 {
@@ -91,6 +101,9 @@ int main()
     // Add error handling, need to know if the shader fails to initialize
     vertexShaderManager.initialize("vertexShader.glsl");
     fragmentShaderManager.initialize("fragmentShader.glsl");
+    Heightmap heightMap("høydedata_svarthvitt.png");
+
+
 
     // Creates the OpenGL shader program
     GLuint shaderProgram = glCreateProgram();
