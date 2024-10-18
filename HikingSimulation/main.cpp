@@ -75,8 +75,8 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Initializes GLEW, for the ability to access the functions with it
     GLenum err = glewInit();
@@ -106,6 +106,11 @@ int main()
         -0.5f, -0.5f, 0.0f, // left vertex position
          0.5f, -0.5f, 0.0f, // right vertex position
          0.0f,  0.5f, 0.0f  // top vertex position
+    };
+
+    glm::vec3 verticesPositions[] =
+    {
+        glm::vec3(0.0f, 0.0f, 0.0f),
     };
 
     // Generate a Vertex Array Object (VAO) and a Vertex Buffer Object (VBO)
@@ -138,25 +143,33 @@ int main()
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Acts as background color
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen and uses the selected color above
+      
+        glUseProgram(shaderProgram);
+        // world transformation
+        glm::mat4 model = glm::mat4(1.0f);
+        //glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+        // camera/view transformation
+        glm::mat4 view = camera.GetViewMatrix();
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+        // pass projection matrix to shader (note that in this case it could change every frame)
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
         // Tells the program which shader program is being used
         // The one we made previously
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO); // Binds the VAO, making it the current active vertex array
-        glDrawArrays(GL_TRIANGLES, 0, 3); // Draws the vertices as a triangle
+        
+        for (GLuint i = 0; i < 1; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, verticesPositions[i]);
+            GLfloat angle = 20.0f * i;
+            model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
-        
-        glUseProgram(shaderProgram);
-        // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
-        // camera/view transformation
-        glm::mat4 view = camera.GetViewMatrix();
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
-        
-        // world transformation
-        glm::mat4 model = glm::mat4(1.0f);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
+
 
         glfwSwapBuffers(window); // Swaps the color buffers to display
         glfwPollEvents(); // Finally process events, like keyboard inputs
