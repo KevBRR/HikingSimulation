@@ -28,6 +28,12 @@
     <Filter Include="Header Files\Environment">
       <UniqueIdentifier>{0990877c-a9ff-4cab-ae7b-8cbe5e2727b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Path">
+      <UniqueIdentifier>{8291da89-0bff-4b69-b55a-198618ccccab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Path">
+      <UniqueIdentifier>{01fb8976-09e0-40a1-87fd-0d9d2808659c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,6 +54,9 @@
     <ClCompile Include="Heightmap.cpp">
       <Filter>Source Files\Terrain</Filter>
     </ClCompile>
+    <ClCompile Include="Path.cpp">
+      <Filter>Source Files\Path</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderManager.h">
@@ -67,6 +76,9 @@
     </ClInclude>
     <ClInclude Include="Heightmap.h">
       <Filter>Header Files\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="Path.h">
+      <Filter>Header Files\Path</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

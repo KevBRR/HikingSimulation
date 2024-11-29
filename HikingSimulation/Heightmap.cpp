@@ -80,6 +80,8 @@ heightRet Heightmap::initialize(const char* heightMapPath) {
     output.NUM_STRIPS = NUM_STRIPS;
     output.NUM_VERTS_PER_STRIP = NUM_VERTS_PER_STRIP;
     output.indices = indices;
+    output.mapWidth = width;
+    output.mapHeight = height;
 
     return output;
 

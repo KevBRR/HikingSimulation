@@ -8,6 +8,8 @@ struct heightRet {
     unsigned int NUM_STRIPS;
     unsigned int NUM_VERTS_PER_STRIP;
     std::vector<unsigned int> indices;
+    int mapWidth;  
+    int mapHeight; 
 };
 
 class Heightmap {
