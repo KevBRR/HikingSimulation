@@ -166,6 +166,51 @@ int main()
     // Link the shaders into the complete shader program to run on the GPU
     glLinkProgram(shaderProgram);
 
+
+
+    // loading the lookup texture for extra colors
+    unsigned int lookupTexture = 0;
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("resources/heightmaps/heightmap_lookup.png", &width, &height, &nrChannels, 0);
+    if (data) {
+        glGenTextures(1, &lookupTexture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, lookupTexture);
+
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        stbi_image_free(data);
+        std::cout << "Texture loaded" << std::endl;
+    }
+    else {
+        std::cerr << "Failed to load texture" << std::endl;
+        glGenTextures(1, &lookupTexture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, lookupTexture);
+
+        unsigned char defaultTexture[4] = { 255, 255, 255, 255 };
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, defaultTexture);
+    }
+
+    // setting the shader program and bindinding the texture
+    glUseProgram(shaderProgram);
+    int lookupLoc = glGetUniformLocation(shaderProgram, "lookup");
+    if (lookupLoc != -1) {
+        glUniform1i(lookupLoc, 0); // Bind to texture unit 0
+    }
+    else {
+        std::cerr << "'lookup' not found in shader." << std::endl;
+    }
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, lookupTexture);
+
+
+
     // Path
     vertexShaderManager.initialize("pathVertex.glsl");
     fragmentShaderManager.initialize("pathFragment.glsl");
