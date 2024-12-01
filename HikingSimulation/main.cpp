@@ -9,7 +9,9 @@
 #include <vector>
 #include "Path.h"
 #include <thread>    
-#include <chrono>        
+#include <chrono>     
+
+// stop kevin 
 
 vector<glm::vec3> convertedHikePath;
 vector<glm::vec3> hikePath = {
@@ -28,31 +30,80 @@ glm::vec3 calculateColor(const glm::vec3& p1, const glm::vec3& p2) {
     if (std::abs(steepness) >= redThreshold) {
         return glm::vec3(1.0f, 0.0f, 0.0f); // Red
     } else if (std::abs(steepness) >= yellowThreshold) {
-        return glm::vec3(1.0f, 1.0f, 0.0f); // Yellow
+        return glm::vec3(0.839f, 0.827f, 0.09f); // Yellow
     } else {
-        return glm::vec3(0.0f, 0.0f, 1.0f); // Blue
+        return glm::vec3(0.68f, 0.85f, 0.90f); // Blue
     }
 }
+
+// light blue 0.68f, 0.85f, 0.90f
 
 
 // Store rendered path segments
 std::vector<glm::vec3> renderedPath;
 void drawHikingPath(const std::vector<glm::vec3>& path, GLuint pathShader, GLuint pathVAO) {
-    glUseProgram(pathShader); // Use the path shader
+    glUseProgram(pathShader);
 
-    // Set the color uniform
-    GLint colorLocation = glGetUniformLocation(pathShader, "pathColor");
-    glUniform3f(colorLocation, 1.0f, 0.0f, 0.0f); // Example: Red path
-
-    // Bind the VAO
+    
     glBindVertexArray(pathVAO);
 
-    // Draw the path
-    glDrawArrays(GL_LINE_STRIP, 0, path.size());
+    // temporary buffer for the entire path with per vertex colors
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> colors;
 
-    // Unbind VAO and shader
+    for (size_t i = 1; i < path.size(); ++i) {
+        // Adding the vertices of the segment
+        vertices.push_back(path[i - 1]);
+        vertices.push_back(path[i]);
+
+        // colors for the vertices based on steepness
+        glm::vec3 color1 = calculateColor(path[i - 1], path[i]);
+        glm::vec3 color2 = calculateColor(path[i], i + 1 < path.size() ? path[i + 1] : path[i]);
+
+        colors.push_back(color1);
+        colors.push_back(color2);
+    }
+
+    // vertex positions and colors to the GPU
+    GLuint vbo[2];
+    glGenBuffers(2, vbo);
+
+    // load vertex positions
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // load vertex colors
+    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), colors.data(), GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glEnableVertexAttribArray(1);
+
+    // drawing the path in segments here
+    glDrawArrays(GL_LINES, 0, vertices.size());
+
+    
+    glDeleteBuffers(2, vbo);
+
+   
     glBindVertexArray(0);
     glUseProgram(0);
+}
+
+
+
+void drawQuadWithTexture(GLuint textureId, glm::vec3 position, float size) {
+    glBindTexture(GL_TEXTURE_2D, textureId);
+
+    float halfSize = size / 2.0f;
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(position.x - halfSize, position.y, position.z - halfSize);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(position.x + halfSize, position.y, position.z - halfSize);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(position.x + halfSize, position.y, position.z + halfSize);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(position.x - halfSize, position.y, position.z + halfSize);
+    glEnd();
 }
 
 
@@ -167,7 +218,6 @@ int main()
     glLinkProgram(shaderProgram);
 
 
-
     // loading the lookup texture for extra colors
     unsigned int lookupTexture = 0;
     int width, height, nrChannels;
@@ -206,19 +256,6 @@ int main()
         std::cerr << "'lookup' not found in shader." << std::endl;
     }
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, lookupTexture);
-
-
-
-    // Path
-    vertexShaderManager.initialize("pathVertex.glsl");
-    fragmentShaderManager.initialize("pathFragment.glsl");
-    glAttachShader(pathShader, vertexShaderManager.getShaderId());
-    glAttachShader(pathShader, fragmentShaderManager.getShaderId());
-    glLinkProgram(pathShader);
-
-
     // Generate a Vertex Array Object (VAO), a Vertex Buffer Object (VBO) and a Element Array Buffer Object
     GLuint terrainVAO, terrainVBO, terrainEBO;
     glGenVertexArrays(1, &terrainVAO);
@@ -248,6 +285,8 @@ int main()
         GL_STATIC_DRAW
     );
 
+    glBindVertexArray(0);
+
     //glBindVertexArray(pathVAO);
     //glBindBuffer(GL_ARRAY_BUFFER, pathVBO);
     //glBufferData(GL_ARRAY_BUFFER,
@@ -261,22 +300,33 @@ int main()
     // Convert the hiking path to terrain coordinates
     float yScale = 1.0f; // Adjust as per your terrain's elevation scaling
     float yShift = 0.0f; // Adjust as per your terrain's elevation offset
-    convertedHikePath = hiker_conversion(hikePath, heightData.mapWidth, heightData.mapHeight, yScale, yShift);
+    //convertedHikePath = hiker_conversion(hikePath, heightData.mapWidth, heightData.mapHeight, yScale, yShift);
 
     // Validate the converted path against the heightmap
     float horizontalScale = 1.0f; // Adjust based on your terrain scaling
-    convertedHikePath = validatePath(convertedHikePath, heightData, horizontalScale, yScale, yShift);
+    //convertedHikePath = validatePath(convertedHikePath, heightData, horizontalScale, yScale, yShift);
+
+    convertedHikePath = processHikePath(hikePath, heightData.mapWidth, heightData.mapHeight, yScale, yShift, heightData, horizontalScale);
+
+    // Path
+    vertexShaderManager.initialize("pathVertex.glsl");
+    fragmentShaderManager.initialize("pathFragment.glsl");
+    glAttachShader(pathShader, vertexShaderManager.getShaderId());
+    glAttachShader(pathShader, fragmentShaderManager.getShaderId());
+    glLinkProgram(pathShader);
+
+    // stop kevin
 
     GLuint pathVAO, pathVBO;
     glGenVertexArrays(1, &pathVAO);
     glBindVertexArray(pathVAO);
 
-    glGenBuffers(1, &pathVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, pathVBO);
-    glBufferData(GL_ARRAY_BUFFER, convertedHikePath.size() * sizeof(glm::vec3), &convertedHikePath[0], GL_STATIC_DRAW);
+    //glGenBuffers(1, &pathVBO);
+    //glBindBuffer(GL_ARRAY_BUFFER, pathVBO);
+    //glBufferData(GL_ARRAY_BUFFER, convertedHikePath.size() * sizeof(glm::vec3), &convertedHikePath[0], GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-    glEnableVertexAttribArray(0);
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    //glEnableVertexAttribArray(0);
 
 
     // Simulation parameters
@@ -324,28 +374,35 @@ int main()
 
         // Render path
         glUseProgram(pathShader);
-
         glUniformMatrix4fv(glGetUniformLocation(pathShader, "model"), 1, GL_FALSE, &model[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(pathShader, "view"), 1, GL_FALSE, &view[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(pathShader, "projection"), 1, GL_FALSE, &projection[0][0]);
-        glUniform4f(glGetUniformLocation(pathShader, "pathColor"), 1.0f, 0.0f, 0.0f, 1.0f); // Red
+        //glUniform4f(glGetUniformLocation(pathShader, "pathColor"), 0.68f, 0.85f, 0.90f, 1.0f); 
         glLineWidth(10.0f);
         
         glBindVertexArray(pathVAO);
         // Draw the rendered path so far
         drawHikingPath(renderedPath, pathShader, pathVAO);
 
+
         // Get the current time
         auto now = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> elapsedTime = now - lastUpdateTime;
 
-        // Check if it's time to update the hiking simulation
+        // wait to update the rendered path until the set time has gone
         if (elapsedTime.count() >= updateInterval && currentPointIndex < convertedHikePath.size()) {
-            // Add the next point to the rendered path
+            // Adding the next point to the rendered path
             renderedPath.push_back(convertedHikePath[currentPointIndex]);
             currentPointIndex++;
-            lastUpdateTime = now; // Reset the last update time
+            lastUpdateTime = now; // resetting the time 
         }
+
+        // Render the hiker icon
+        float iconSize = 5.0f; // Adjust size to fit your scene
+        //if (!renderedPath.empty()) {
+        //    glActiveTexture(GL_TEXTURE1);
+        //    drawQuadWithTexture(hikerIconTexture, renderedPath.back(), iconSize);
+        //}
 
         //glDrawArrays(GL_LINE_STRIP, 0, convertedHikePath.size());
 
@@ -422,28 +479,3 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }  
 
-
-//#version 330 core
-//layout(location = 0) in vec3 terrainPos;
-//layout(location = 1) in vec3 pathPos;
-//
-//uniform mat4 model;
-//uniform mat4 view;
-//uniform mat4 projection;
-//
-//void main() {
-//    if (gl_VertexID < SOME_THRESHOLD) {
-//        gl_Position = projection * view * model * vec4(terrainPos, 1.0);
-//    }
-//    else {
-//        gl_Position = projection * view * model * vec4(pathPos, 1.0);
-//    }
-//}
-//
-//// Terrain
-//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-//glEnableVertexAttribArray(0);
-//
-//// Path
-//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-//glEnableVertexAttribArray(1);

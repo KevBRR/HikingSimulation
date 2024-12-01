@@ -1,10 +1,8 @@
 #version 330 core
-out vec4 FragColor;
+in vec3 fragColor;
 
-uniform vec3 pathColor; 
+out vec4 color;
 
 void main() {
-    FragColor = vec4(pathColor, 1.0);
+    color = vec4(fragColor, 1.0); // Use interpolated color
 }
-
-
