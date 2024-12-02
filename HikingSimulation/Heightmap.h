@@ -15,8 +15,6 @@ struct heightRet {
 class Heightmap {
     public:
     heightRet initialize(const char* heightMapPath);
-
-    // Need a destructor here, release the image file 
 };
 
 #endif // !HEIGHTMAP_H

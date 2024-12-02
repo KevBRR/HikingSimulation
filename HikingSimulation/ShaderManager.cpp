@@ -33,12 +33,9 @@ void ShaderManager::compileShader(const char* shaderSource, GLenum shaderType) {
 	// Make this bool and handle if error
 }
 
-
 // GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 // glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
 // glCompileShader(vertexShader);
-
-
 
 // Load shaders from file
 // Ability to load shader code at runtime instead of only when compilating

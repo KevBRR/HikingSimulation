@@ -7,7 +7,7 @@ void FragmentShaderManager::initialize(const char* fragmentSourceFile) {
 	char vs[128] = "Shaders/fragment/";
 	strcat_s(vs, fragmentSourceFile);
 
-	// Load the vertex shader into a buffer from file
+	// load the vertex shader into a buffer from file
 	fragmentShaderBuffer = loadShaderSourceFile(vs);
 	if (fragmentShaderBuffer.empty()) {
 		cout << "Vertex Shader buffer could not be initialized" << endl;

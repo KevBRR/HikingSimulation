@@ -12,20 +12,8 @@ struct Bounds {
     float minHeight, maxHeight;
 };
 
-
-// Function declarations
+// Functions
 Bounds calculateBounds(const std::vector<glm::vec3>& hikePath);
-
-std::vector<glm::vec3> hiker_conversion(const std::vector<glm::vec3>& hikePath, int heightmapWidth, int heightmapHeight, float yScale, float yShift);
-std::vector<glm::vec3> validatePath(const std::vector<glm::vec3>& pathPoints, const heightRet& terrain, float horizontalScale, float yScale, float yShift);
-std::vector<glm::vec3> parseGPX(const std::string& filename);
-std::vector<glm::vec3> processHikePath(
-    const std::vector<glm::vec3>& hikePath,
-    int heightmapWidth,
-    int heightmapHeight,
-    float yScale,
-    float yShift,
-    const heightRet& terrain,
-    float horizontalScale);
+std::vector<glm::vec3> processHikePath(const std::vector<glm::vec3>& hikePath, int heightmapWidth, int heightmapHeight, float yScale, float yShift, const heightRet& terrain, float horizontalScale);
 
 #endif // PATH_H
