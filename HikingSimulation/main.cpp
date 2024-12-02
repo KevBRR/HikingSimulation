@@ -100,23 +100,6 @@ void drawHikingPath(const std::vector<glm::vec3>& path, GLuint pathShader, GLuin
     glUseProgram(0);
 }
 
-
-
-void drawQuadWithTexture(GLuint textureId, glm::vec3 position, float size) {
-    glBindTexture(GL_TEXTURE_2D, textureId);
-
-    float halfSize = size / 2.0f;
-
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(position.x - halfSize, position.y, position.z - halfSize);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(position.x + halfSize, position.y, position.z - halfSize);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(position.x + halfSize, position.y, position.z + halfSize);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(position.x - halfSize, position.y, position.z + halfSize);
-    glEnd();
-}
-
-
-
 // Callbacks
 // For when the window is resized to adjust the viewport
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -380,13 +363,6 @@ int main()
             currentPointIndex++;
             lastUpdateTime = now; // resetting the time 
         }
-
-        // Render the hiker icon
-        float iconSize = 5.0f; // Adjust size to fit your scene
-        //if (!renderedPath.empty()) {
-        //    glActiveTexture(GL_TEXTURE1);
-        //    drawQuadWithTexture(hikerIconTexture, renderedPath.back(), iconSize);
-        //}
 
         glfwSwapBuffers(window); // Swaps the color buffers to display
         glfwPollEvents(); // Finally process events, like keyboard inputs
